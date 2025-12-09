@@ -1,0 +1,106 @@
+#include <string.h>
+#include <stdio.h>
+
+struct arvoreno
+{
+    int fim;
+    struct arvoreno *prox[2];
+};
+
+struct arvore
+{
+    struct arvoreno *raiz;
+};
+
+int max(int a, int b)
+{
+    return a > b ? a : b;
+}
+
+void arvoreum(struct arvoreno *no)
+{
+    no->fim = 0;
+    for (int i = 0; i < 2; ++i)
+    {
+        no->prox[i] = NULL;
+    }
+}
+
+void ramoarvore(struct arvore *t)
+{
+    t->raiz = (struct arvoreno *)malloc(sizeof(struct arvoreno));
+    arvoreum(t->raiz);
+}
+
+void removeno(struct arvoreno *no)
+{
+    for (int i = 0; i < 2; ++i)
+    {
+        if (no->prox[i] != NULL)
+        {
+            removeno(no->prox[i]);
+        }
+    }
+    free(no);
+}
+
+void remove(struct arvore *t)
+{
+    removeno(t->raiz);
+}
+
+void insere(struct arvore *t, char *palavra)
+{
+    struct arvoreno *no = t->raiz;
+    int n = strlen(palavra);
+    for (int i = 0; i < n; ++i)
+    {
+        int indice = palavra[i] - '(';
+        if (no->prox[indice] == NULL)
+        {
+            no->prox[indice] = (struct arvoreno *)malloc(sizeof(struct arvoreno));
+            arvoreum(no->prox[indice]);
+        }
+        no = no->prox[indice];
+    }
+    no->fim = 1;
+}
+
+struct arvoreno *confere(struct arvore *t, char *palavra)
+{
+    struct arvoreno *no = t->raiz;
+    for (int i = 0; i < strlen(palavra); ++i)
+    {
+        int indice = palavra[i] - '(';
+        if (no->prox[indice] == NULL)
+        {
+            return NULL;
+        }
+        no = no->prox[indice];
+    }
+
+    return no;
+}
+
+int main()
+{
+    int resposta;
+    struct arvore arvore;
+    char letras[100001];
+
+    resposta = 0;
+    ramoarvore(&arvore);
+    while (scanf("%s\n", &letras) != EOF)
+    {
+        struct arvoreno *no = confere(&arvore, letras);
+        if (no == NULL || !(no->fim))
+        {
+            ++resposta;
+            insere(&arvore, letras);
+        }
+    }
+
+    printf("%d\n", resposta);
+
+    return 0;
+}
